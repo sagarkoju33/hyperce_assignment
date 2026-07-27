@@ -8,7 +8,7 @@ trees. Built for the Flutter Developer technical assignment.
 
 ## 1. Project Setup
 
-**Requirements:** Flutter 3.22+ (Dart 3.3+).
+**Requirements:** Flutter 3.44+ (Dart 3.12+).
 
 ```bash
 flutter pub get
@@ -209,3 +209,9 @@ with minimal changes").
 
 Not implemented (out of scope for the 4–6 hour budget): offline persistence,
 infinite scrolling, remote theme push updates, analytics, golden tests.
+
+
+
+## 6. Output
+
+<video controls src="assets/mock/video/output.mp4" title="Output"></video>
