@@ -1,9 +1,9 @@
+import 'package:b1/models/widget_config.dart';
+import 'package:b1/widgets/components/sdui_error_widget.dart';
+import 'package:b1/widgets/components/sdui_text.dart';
+import 'package:b1/widgets/renderer/widget_factory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sdui_app/models/widget_config.dart';
-import 'package:sdui_app/widgets/components/sdui_error_widget.dart';
-import 'package:sdui_app/widgets/components/sdui_text.dart';
-import 'package:sdui_app/widgets/renderer/widget_factory.dart';
 
 void main() {
   group('WidgetFactory', () {
@@ -26,11 +26,12 @@ void main() {
     });
 
     testWidgets('renders text widget with correct content', (tester) async {
-      final config = WidgetConfig.fromJson({'type': 'text', 'text': 'Welcome Rahul'});
+      final config =
+          WidgetConfig.fromJson({'type': 'text', 'text': 'Welcome Rahul'});
       await tester.pumpWidget(
         MaterialApp(home: Scaffold(body: WidgetFactory.build(config))),
       );
-      expect(find.text('Welcome Rahul'), findsOneWidget);
+      expect(find.text('Welcome Sagar Koju'), findsOneWidget);
     });
   });
 }

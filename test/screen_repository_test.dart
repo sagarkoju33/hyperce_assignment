@@ -1,7 +1,8 @@
+import 'package:b1/network/api_client.dart';
+import 'package:b1/network/api_exception.dart';
+import 'package:b1/repositories/screen_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sdui_app/network/api_client.dart';
-import 'package:sdui_app/network/api_exception.dart';
-import 'package:sdui_app/repositories/screen_repository.dart';
+
 
 class _FakeApiClient implements ApiClient {
   int callCount = 0;
