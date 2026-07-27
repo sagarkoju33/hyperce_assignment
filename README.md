@@ -1,14 +1,12 @@
 # Server-Driven UI (SDUI) — Flutter Assignment
 
-A Flutter app that renders its entire UI — screens, forms, navigation, and
-theming — from JSON returned by an API, rather than from hardcoded widget
-trees. Built for the Flutter Developer technical assignment.
+A Flutter app that renders its entire UI — screens, forms, navigation, and theming — from JSON returned by an API, not from hardcoded widget trees.
 
 ---
 
 ## 1. Project Setup
 
-**Requirements:** Flutter 3.44+ (Dart 3.12+).
+**Requirements:** Flutter 3.44+ (Dart 3.12+)
 
 ```bash
 flutter pub get
@@ -21,7 +19,7 @@ Run tests:
 flutter test
 ```
 
-No backend server needs to be started. See [Assumptions](#4-assumptions) below.
+No backend server needed — see [Assumptions](#4-assumptions).
 
 ---
 
@@ -29,188 +27,110 @@ No backend server needs to be started. See [Assumptions](#4-assumptions) below.
 
 ```
 lib/
-├── core/                  # Cross-cutting utilities: theme, Result type, color/style parsing
-├── network/                # ApiClient contract + Dio (real) and Mock implementations
-├── models/                # ScreenConfig, WidgetConfig, ActionConfig — the JSON-parsing layer
-├── repositories/           # ScreenRepository — single source of truth for fetching/caching screens
+├── core/                  # Theme, Result type, color/style parsing
+├── network/                # ApiClient contract — Dio (real) and Mock implementations
+├── models/                # ScreenConfig, WidgetConfig, ActionConfig — JSON parsing layer
+├── repositories/           # ScreenRepository — fetches and caches screens
 ├── state/                  # Riverpod providers (DI root, screen fetch, form state, theme)
 ├── widgets/
-│   ├── renderer/            # WidgetFactory (type -> widget dispatch), SduiRenderer, ActionHandler
-│   └── components/          # One widget per supported JSON type (text, button, image, ...)
-├── screens/                # DynamicScreen — the ONE screen class used for every backend route
-└── routes/                  # AppRouter — generates routes for any route name, no hardcoded list
+│   ├── renderer/            # WidgetFactory (type → widget), SduiRenderer, ActionHandler
+│   └── components/          # One widget per JSON type (text, button, image, ...)
+├── screens/                # DynamicScreen — the one screen class used for every route
+└── routes/                  # AppRouter — generates routes for any backend route name
 ```
 
 **Data flow:**
 
 ```
 Backend JSON
-   -> ApiClient (network I/O only)
-   -> ScreenRepository (parsing, caching, error normalization -> Result<T>)
-   -> Riverpod screenConfigProvider (async state)
-   -> DynamicScreen (loading / error / data states)
-   -> SduiRenderer -> WidgetFactory -> individual Sdui* widgets
+  → ApiClient (network I/O)
+  → ScreenRepository (parse, cache, normalize errors → Result<T>)
+  → screenConfigProvider (Riverpod async state)
+  → DynamicScreen (loading / error / data)
+  → SduiRenderer → WidgetFactory → individual Sdui* widgets
 ```
 
-Each layer only knows about the layer directly below it, which keeps the
-system testable and lets any layer be swapped independently (e.g. mock API
-for a real one, Riverpod for another state manager, one widget component for
-a redesigned one).
+Each layer only knows the one below it. Any layer can be swapped independently — mock API for a real one, Riverpod for another state manager, one widget for a redesigned one.
 
 ### The rendering engine
 
-`WidgetConfig` (in `models/widget_config.dart`) is a thin, recursive wrapper
-around a widget's raw JSON node with typed, null-safe getters
-(`text`, `action`, `children`, `child`, ...). It intentionally does **not**
-have a subclass per widget type — that would mean touching the model every
-time a new widget is added.
+`WidgetConfig` wraps a widget's raw JSON as typed, null-safe getters (`text`, `action`, `children`, `child`, ...). There's no per-widget-type Dart class — that would mean editing the model every time a widget is added.
 
-`WidgetFactory.build(WidgetConfig)` is the single dispatch point mapping a
-`type` string to a Flutter widget. **Adding a new widget type is exactly two
-steps:**
+`WidgetFactory.build(WidgetConfig)` maps a JSON `type` string to a Flutter widget. **Adding a new widget type takes two steps:**
 
-1. Create `widgets/components/sdui_<name>.dart`.
-2. Add one `case '<name>':` in `widget_factory.dart`.
+1. Create `widgets/components/sdui_<name>.dart`
+2. Add one `case '<name>':` in `widget_factory.dart`
 
-No other file changes. Container widgets (`column`, `row`, `card`) recurse
-back into `WidgetFactory.build` for their children, so arbitrarily nested
-trees "just work."
+Nothing else changes. Containers (`column`, `row`, `card`) recurse into `WidgetFactory.build` for their children, so nested trees just work.
 
 ### Actions & navigation
 
-Every action (`navigate`, `open_url`, `api_call`, `snackbar`) is modeled as
-`ActionConfig` and executed by the single `ActionHandler.execute(...)`
-method — widgets never contain navigation/API logic themselves. Navigation
-is fully backend-driven: `AppRouter.onGenerateRoute` builds a `DynamicScreen`
-for **any** route name it's given, so a new screen can be added on the
-backend with zero client code changes.
+Every action (`navigate`, `open_url`, `api_call`, `snackbar`) is an `ActionConfig`, executed by one method: `ActionHandler.execute(...)`. Widgets never contain navigation or API logic themselves.
+
+Navigation is fully backend-driven — `AppRouter.onGenerateRoute` builds a `DynamicScreen` for any route name it receives. New screens need zero client code changes.
 
 ### Form validation on submit
 
-Every screen is wrapped in a Flutter `Form` (`SduiRenderer`), and each
-`textfield` widget renders as a `TextFormField` instead of a plain
-`TextField`. This gives two layers of validation from one set of rules
-defined per-field in JSON:
+Every screen is wrapped in a `Form` (`SduiRenderer`), and each `textfield` renders as a `TextFormField`. One set of JSON rules per field drives two layers of validation:
 
-- **Live, per-field validation** — once a field is touched,
-  `AutovalidateMode.onUserInteraction` re-runs its validator on every
-  keystroke, checking the format declared by `"validator"` (`email`,
-  `number`).
-- **Whole-form validation on submit** — an `api_call` button (e.g. "Save
-  Profile") acts as the form's submit action. Before it calls the API,
-  `ActionHandler` runs `Form.of(context).validate()`, which validates
-  *every* field on the screen in one pass — including required fields the
-  user never touched at all. If anything fails, the errors appear inline
-  and a "Please fix the highlighted fields." snackbar shows; nothing is
-  submitted and no success message is shown until the form is fully valid.
+- **Live, per-field** — once a field is touched, `AutovalidateMode.onUserInteraction` re-checks its format (`email`, `number`) on every keystroke.
+- **Whole-form, on submit** — an `api_call` button (e.g. "Save Profile") triggers `Form.of(context).validate()` first, checking every field at once, including ones the user never touched. Anything invalid blocks submission and shows inline errors plus a "Please fix the highlighted fields." snackbar.
 
-A field can be **required independently of its format check** via
-`"required": true`, so e.g. Email must be both filled in *and* a valid
-email address, not just one or the other:
+A field can require a value independently of its format check via `"required": true`:
 
 ```json
 { "type": "textfield", "id": "email", "label": "Email",
   "validator": "email", "required": true }
 ```
 
-`WidgetConfig.required` also stays `true` for the original
-`"validator": "required"` shorthand, so both styles work. See
-`test/sdui_textfield_validation_test.dart` for coverage of the required +
-format-check combinations.
+The `"validator": "required"` shorthand still works too. See `test/sdui_textfield_validation_test.dart` for coverage.
 
 ### Timestamp validation
 
-Screen configs can include a `generatedAt` field (ISO 8601, e.g.
-`"2026-07-27T09:00:00Z"`). `DateValidator` (`core/date_validator.dart`)
-strictly validates the format and rejects ambiguous or malformed strings
-(e.g. `"27/07/2026"`, an out-of-range month/day) rather than trusting
-`DateTime.tryParse` alone, since Dart silently normalizes some invalid
-dates instead of failing. An invalid or missing timestamp never blocks the
-screen from rendering — `ScreenConfig.hasInvalidTimestamp` just flags it so
-the UI can show a small "invalid timestamp" hint (see the banner under the
-app bar in `DynamicScreen`) instead of a hard failure. The `profile` mock
-screen intentionally ships a malformed `generatedAt` to demonstrate this
-live; `home` and `details` ship valid ones.
+Screen configs can include `generatedAt` (ISO 8601, e.g. `"2026-07-27T09:00:00Z"`). `DateValidator` strictly checks the format and rejects malformed strings (`"27/07/2026"`, an out-of-range month/day) — `DateTime.tryParse` alone would silently normalize some of these instead of failing.
+
+A bad or missing timestamp never blocks rendering. `ScreenConfig.hasInvalidTimestamp` just flags it, and `DynamicScreen` shows a small hint banner. The `profile` mock screen ships a deliberately malformed timestamp to demonstrate this; `home` and `details` ship valid ones.
 
 ### Error handling
 
-- **Network/parsing errors** are normalized into `ApiException` at the
-  network layer, then converted to a `Result.failure` by the repository —
-  callers never see raw exceptions.
-- **Unknown widget types / missing `type`** render an inline
-  `SduiErrorWidget` instead of throwing, so one bad node never crashes the
-  whole screen (see `test/widget_factory_test.dart`).
-- **Missing required properties** (e.g. a `text` widget with no `text`)
-  degrade to an empty/harmless render rather than a null-check crash.
-- **API failures** surface a retry UI (`DynamicScreen`'s `_ErrorState`) with
-  pull-to-refresh also available on success states.
+- **Network/parsing errors** → normalized into `ApiException`, then a `Result.failure`. Callers never see raw exceptions.
+- **Unknown/missing widget types** → render an inline `SduiErrorWidget` instead of crashing the screen.
+- **Missing required properties** (e.g. `text` with no `text` value) → render harmlessly empty instead of throwing.
+- **API failures** → retry UI (`DynamicScreen`'s `_ErrorState`); pull-to-refresh available on success too.
 
 ---
 
 ## 3. Design Decisions
 
-**State management — Riverpod.**
-Chosen over Bloc/Provider because:
-- `FutureProvider.family` gives per-route async state (loading/error/data)
-  for free, with no boilerplate events/states classes per screen — a good
-  fit since routes are dynamic and not known at compile time.
-- `.autoDispose` cleans up screen state automatically when a route is
-  popped, which matters for a backend that could describe arbitrarily many
-  screens.
-- Providers are plain, testable classes with compile-time-safe DI (see
-  `state/screen_providers.dart` as the single composition root), which pairs
-  well with the repository pattern already required by the assignment.
+**State management: Riverpod**
+- `FutureProvider.family` gives per-route loading/error/data state for free — no per-screen boilerplate, and routes aren't known at compile time anyway.
+- `.autoDispose` frees screen state automatically when a route is popped.
+- Providers are plain, testable, DI-friendly classes (`state/screen_providers.dart` is the composition root) — a natural fit for the required repository pattern.
 
-**Mock backend instead of a live server.**
-`MockApiClient` implements the exact same `ApiClient` interface as
-`DioApiClient` and returns bundled JSON (`assets/mock/*.json`) after a
-simulated delay. This keeps the assignment runnable with `flutter run` and
-no separate server process, while still exercising the full
-fetch → parse → cache → render → error-handle pipeline exactly as a real
-network call would. Pointing the app at a real backend is a one-line change
-in `screen_providers.dart` (swap `MockApiClient()` for
-`DioApiClient(baseUrl: ...)`).
+**Mock backend, not a live server**
+`MockApiClient` implements the same `ApiClient` interface as `DioApiClient`, returning bundled JSON after a simulated delay. Runs with just `flutter run`, no server, while still exercising the real fetch → parse → cache → render → error pipeline. Switching to a live backend is a one-line change in `screen_providers.dart` (`MockApiClient()` → `DioApiClient(baseUrl: ...)`).
 
-**`Result<T>` instead of throwing across layers.**
-Forces every caller (state layer, UI) to explicitly handle both success and
-failure via `.when(success: ..., failure: ...)`, rather than relying on
-try/catch scattered through the UI.
+**`Result<T>` instead of throwing across layers**
+Forces every caller to explicitly handle both success and failure via `.when(success: ..., failure: ...)`, instead of scattering try/catch through the UI.
 
-**Generic `WidgetConfig` instead of one Dart class per widget type.**
-Trades a small amount of type safety for the scalability the assignment
-explicitly asks for ("architecture should allow adding new widget types
-with minimal changes").
+**Generic `WidgetConfig`, not one class per widget type**
+Trades a little type safety for the scalability the assignment asks for — new widget types with minimal changes.
 
 ---
 
 ## 4. Assumptions
 
-- No real backend was provided, so `MockApiClient` simulates
-  `GET /screen/{name}` and `POST /action/{name}` using bundled JSON assets
-  and a network-like delay. This was the intended interpretation of "mock
-  REST API" for an offline-runnable take-home assignment.
-- Three example screens are included — `home`, `details`, `profile` — to
-  demonstrate navigation, a dynamic form with validation, and an
-  `api_call` action end-to-end. `profile`'s JSON also intentionally includes
-  one unknown widget type to demonstrate the error-handling requirement live.
-- Backend color values are hex strings (`#RRGGBB` or `#AARRGGBB`); invalid
-  values fall back to the current theme rather than crashing.
-- "Dynamic theming" is interpreted as: the app ships proper Material
-  light/dark themes (toggleable via the app bar icon), and the backend can
-  additionally override specific widget colors (card/background) per screen
-  — rather than the backend replacing the entire theme system.
+- No real backend was provided, so `MockApiClient` simulates `GET /screen/{name}` and `POST /action/{name}` from bundled JSON with network-like delay.
+- Three example screens — `home`, `details`, `profile` — cover navigation, dynamic forms with validation, and an `api_call` action end-to-end. `profile` also includes one unknown widget type to demo error handling live.
+- Backend colors are hex strings (`#RRGGBB` or `#AARRGGBB`); invalid values fall back to the current theme.
+- "Dynamic theming" = proper Material light/dark themes (toggleable in the app bar) plus backend-controlled colors on individual widgets — not a full backend-driven theme replacement.
 
-## 5. Bonus items implemented
+## 5. Bonus Items Implemented
 
-- ✅ Widget/screen caching (`ScreenRepositoryImpl`'s in-memory cache)
-- ✅ Pull-to-refresh (`RefreshIndicator` in `DynamicScreen`)
+- ✅ Widget/screen caching (in-memory, in `ScreenRepositoryImpl`)
+- ✅ Pull-to-refresh
 - ✅ Image caching (`cached_network_image`)
-- ✅ Unit tests (repository + widget factory, see `test/`)
-
-Not implemented (out of scope for the 4–6 hour budget): offline persistence,
-infinite scrolling, remote theme push updates, analytics, golden tests.
-
-
+- ✅ Unit tests (repository, widget factory, validators)
 
 ## 6. Output
 
