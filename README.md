@@ -102,10 +102,30 @@ A bad or missing timestamp never blocks rendering. `ScreenConfig.hasInvalidTimes
 
 ## 3. Design Decisions
 
-**State management: Riverpod**
-- `FutureProvider.family` gives per-route loading/error/data state for free — no per-screen boilerplate, and routes aren't known at compile time anyway.
-- `.autoDispose` frees screen state automatically when a route is popped.
-- Providers are plain, testable, DI-friendly classes (`state/screen_providers.dart` is the composition root) — a natural fit for the required repository pattern.
+**State management: Riverpod (vs Bloc vs Provider)**
+
+The assignment allowed Bloc, Riverpod, or Provider. Here's the comparison and why Riverpod won for this specific app.
+
+| | **Provider** | **Bloc** | **Riverpod** |
+|---|---|---|---|
+| Async state per dynamic key (e.g. per route name) | No built-in support — needs manual `FutureBuilder` + caching per screen | Needs a new Event/State/Bloc class per screen | `FutureProvider.family` — built in, zero boilerplate |
+| Boilerplate per screen | Low, but grows fast for async + error + loading | High — Event class, State class(es), Bloc class | None — same generic provider reused for every route |
+| Reading state outside widgets (e.g. in `ActionHandler`, `ScreenRepository`) | Needs `BuildContext` (`context.read`) — awkward in plain Dart classes | Needs a Bloc instance reference passed around | `Ref` — plain Dart classes read providers with no `BuildContext` |
+| Auto cleanup of unused screen state | Manual | Manual (`close()` per Bloc) | `.autoDispose` — automatic |
+| Best fit for | Simple, mostly-static app state | A **fixed**, well-known set of complex flows (checkout, auth) | An **open-ended** set of screens sharing one generic fetch/render flow |
+
+**Why not Provider.** It's fine for simple DI and static state, but has no first-class answer for "fetch async data per dynamic key, with loading/error/data states and automatic cleanup." Since the backend can send *any* route name, that logic would have to be hand-rolled per screen. Provider also leans on `BuildContext` to read state, which is awkward inside non-widget classes like `ActionHandler` and `ScreenRepository`.
+
+**Why not Bloc.** Bloc is excellent for complex, event-driven flows with a strict, testable contract — but it wants an Event class, a State class (often several, for loading/loaded/error), and a Bloc class *per screen*. That's a poor fit here: SDUI screens are dynamic and unbounded, so writing a new Bloc every time the backend adds a route doesn't scale. Bloc suits a fixed set of complex flows; this app is the opposite shape — one simple flow (fetch → render) repeated across arbitrarily many screens.
+
+**Why Riverpod.**
+- `FutureProvider.family` gives "async state, keyed by route name" for free — `screenConfigProvider('home')` and `screenConfigProvider('profile')` are just two independent, cached instances of the same provider, no custom classes needed.
+- `.autoDispose` frees a screen's state automatically once its route is popped, which matters when the backend can describe an unbounded number of screens.
+- No `BuildContext` needed to read state — plain Dart classes like `ScreenRepository` and `ActionHandler` depend on providers cleanly via `Ref`/`WidgetRef`. This matters because actions (navigate, API calls) fire from one central, non-widget `ActionHandler`, not from each widget individually.
+- Compile-time-safe DI: the `apiClientProvider → screenRepositoryProvider → screenConfigProvider` chain in `screen_providers.dart` is the single composition root. Swapping `MockApiClient` for `DioApiClient` is a one-line change, and everything downstream stays typed and testable with no service locator.
+- Maps directly onto the repository pattern already required: the repository returns `Result<ScreenConfig>`, Riverpod watches it, and `AsyncValue.when(loading/error/data)` covers the loading-state and error-handling requirements with no extra plumbing.
+
+In short: Provider is too thin for dynamic async fetching per route, Bloc is too heavyweight for a screen count that isn't fixed at compile time, and Riverpod's `family` + `autoDispose` + context-free reads match the actual shape of an SDUI app — one generic fetch/render flow repeated over an open-ended set of backend-defined screens.
 
 **Mock backend, not a live server**
 `MockApiClient` implements the same `ApiClient` interface as `DioApiClient`, returning bundled JSON after a simulated delay. Runs with just `flutter run`, no server, while still exercising the real fetch → parse → cache → render → error pipeline. Switching to a live backend is a one-line change in `screen_providers.dart` (`MockApiClient()` → `DioApiClient(baseUrl: ...)`).
