@@ -214,6 +214,6 @@ infinite scrolling, remote theme push updates, analytics, golden tests.
 
 ## 6. Output
 
-[![Watch Demo](assets/images/output_thumbnail.png)](assets/video/output.mp4)
+[View Output Video](assets/mock/video/output.mp4)
 
 Click the image to download/play the demo video.
