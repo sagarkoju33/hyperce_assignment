@@ -214,6 +214,5 @@ infinite scrolling, remote theme push updates, analytics, golden tests.
 
 ## 6. Output
 
-[View Output Video](assets/mock/video/output.mp4)
-
-Click the image to download/play the demo video.
+🎥 **Demo Video**
+[▶️ Watch Demo](https://github.com/sagarkoju33/hyperce_assignment/blob/main/assets/video/output.mp4)
