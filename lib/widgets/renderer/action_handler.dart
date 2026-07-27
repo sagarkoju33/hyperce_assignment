@@ -4,10 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/action_config.dart';
 import '../../state/screen_providers.dart';
 
-/// Central executor for every [ActionConfig] in the app. Widgets never
-/// contain action logic themselves (e.g. `SduiButton` doesn't know how to
-/// navigate) - they just call [ActionHandler.execute]. This is what lets
-/// new action types be added in exactly one place.
 class ActionHandler {
   ActionHandler._();
 
@@ -47,9 +43,6 @@ class ActionHandler {
         break;
 
       case SduiActionType.unknown:
-        // Unknown action types fail silently in production but are logged
-        // for visibility, matching the "unknown widget/action" error
-        // handling requirement without crashing the app.
         debugPrint('SDUI: unknown action type received: ${action.raw}');
         break;
     }
@@ -62,12 +55,6 @@ class ActionHandler {
   ) async {
     if (action.endpoint == null) return;
 
-    // `api_call` buttons act as the form's submit button. Before sending
-    // anything, validate every SduiTextField on the screen (via the
-    // ancestor Form added in SduiRenderer) - this catches required fields
-    // the user never typed into, not just ones with bad input. Validation
-    // errors are shown inline by each field; nothing is submitted and no
-    // success message is shown until the form is actually valid.
     final formState = Form.of(context);
     if (!formState.validate()) {
       _showSnackbar(context, 'Please fix the highlighted fields.');
@@ -86,14 +73,10 @@ class ActionHandler {
     if (!context.mounted) return;
 
     result.when(
-      success: (_) => _showSnackbar(
-        context,
-        action.onSuccessMessage ?? 'Success',
-      ),
-      failure: (message, _) => _showSnackbar(
-        context,
-        action.onErrorMessage ?? message,
-      ),
+      success: (_) =>
+          _showSnackbar(context, action.onSuccessMessage ?? 'Success'),
+      failure: (message, _) =>
+          _showSnackbar(context, action.onErrorMessage ?? message),
     );
   }
 

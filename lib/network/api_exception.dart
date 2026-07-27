@@ -1,5 +1,4 @@
-/// Represents a normalized network/API error so upper layers never need to
-/// know whether the failure came from Dio, JSON parsing, or the mock layer.
+
 class ApiException implements Exception {
   final String message;
   final int? statusCode;

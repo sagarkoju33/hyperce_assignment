@@ -1,38 +1,34 @@
 import 'package:dio/dio.dart';
 import 'api_exception.dart';
 
-/// Abstraction over "however we talk to the network". The rest of the app
-/// only depends on this interface, so swapping the mock implementation for
-/// a real backend (or vice versa, e.g. in tests) is a one-line change at
-/// the composition root (see `main.dart`).
 abstract class ApiClient {
   Future<Map<String, dynamic>> get(String path);
   Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body});
 }
 
-/// Real implementation backed by Dio, ready to point at an actual REST
-/// backend. Not wired up by default (there is no live server for this
-/// assignment) but included to show the intended production path -
-/// see [MockApiClient] for the implementation actually used at runtime.
 class DioApiClient implements ApiClient {
   final Dio _dio;
 
   DioApiClient({String baseUrl = 'https://example.com/api', Dio? dio})
-      : _dio = dio ??
-            Dio(BaseOptions(
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
               baseUrl: baseUrl,
               connectTimeout: const Duration(seconds: 10),
               receiveTimeout: const Duration(seconds: 10),
-            ));
+            ),
+          );
 
   @override
-  Future<Map<String, dynamic>> get(String path) => _request(
-        () => _dio.get(path),
-      );
+  Future<Map<String, dynamic>> get(String path) =>
+      _request(() => _dio.get(path));
 
   @override
-  Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) =>
-      _request(() => _dio.post(path, data: body));
+  Future<Map<String, dynamic>> post(
+    String path, {
+    Map<String, dynamic>? body,
+  }) => _request(() => _dio.post(path, data: body));
 
   Future<Map<String, dynamic>> _request(
     Future<Response> Function() call,

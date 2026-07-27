@@ -11,18 +11,6 @@ import '../components/sdui_spacer.dart';
 import '../components/sdui_text.dart';
 import '../components/sdui_textfield.dart';
 
-/// The heart of the Server-Driven UI engine. [build] maps a widget `type`
-/// string to a concrete Flutter widget.
-///
-/// ## Adding a new widget type
-/// 1. Create a new builder widget under `widgets/components/`.
-/// 2. Add one `case` below.
-/// That's the entire integration surface - no other file needs to change,
-/// which satisfies the "minimal changes to add new widget types"
-/// requirement.
-///
-/// Unknown types never throw: they render an inline [SduiErrorWidget] so a
-/// single unrecognized node from the backend can't crash the whole screen.
 class WidgetFactory {
   WidgetFactory._();
 
@@ -57,11 +45,7 @@ class WidgetFactory {
           );
       }
     } catch (e) {
-      // A defensive last line - a bug in one widget builder should never
-      // take down the entire screen render.
-      return SduiErrorWidget(
-        message: 'Failed to render "${config.type}": $e',
-      );
+      return SduiErrorWidget(message: 'Failed to render "${config.type}": $e');
     }
   }
 }

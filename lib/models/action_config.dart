@@ -17,10 +17,6 @@ SduiActionType _parseActionType(String? raw) {
   }
 }
 
-/// Represents any backend-defined action attached to a widget (usually a
-/// button). New action types can be added by extending [SduiActionType]
-/// and handling the new case in `ActionHandler`, without touching any
-/// widget rendering code.
 class ActionConfig extends Equatable {
   final SduiActionType type;
   final String? route;

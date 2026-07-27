@@ -1,7 +1,4 @@
-/// A lightweight Result type (similar to `Either`) used to propagate
-/// success/failure across the network -> repository -> UI layers without
-/// relying on exceptions for control flow. This keeps error handling
-/// explicit and forces callers to handle both cases.
+
 sealed class Result<T> {
   const Result();
 

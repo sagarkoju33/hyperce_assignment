@@ -10,8 +10,6 @@ class SduiText extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = config.text;
     if (text == null) {
-      // Missing required property -> render nothing visible rather than
-      // throwing, per the "missing widget properties" error-handling rule.
       return const SizedBox.shrink();
     }
     return Text(

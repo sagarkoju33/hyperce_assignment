@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Parses backend-supplied color strings such as "#2196F3" or "#802196F3"
-/// into a [Color]. Falls back to [fallback] (or transparent) on bad input,
-/// so a malformed color never crashes the renderer.
 class ColorUtils {
   ColorUtils._();
 

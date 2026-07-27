@@ -3,15 +3,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'api_client.dart';
 import 'api_exception.dart';
 
-/// A mock backend that implements the same [ApiClient] contract as
-/// [DioApiClient]. It simulates network latency and reads screen
-/// definitions from bundled JSON assets instead of a live server, which
-/// keeps this assignment fully runnable offline while still exercising the
-/// full fetch -> parse -> render pipeline exactly as a real API would.
-///
-/// Swapping this out for [DioApiClient] pointed at a real backend requires
-/// no changes anywhere else in the app - see the provider override in
-/// `lib/state/screen_providers.dart`.
 class MockApiClient implements ApiClient {
   final Map<String, String> _routeToAsset = const {
     '/screen/home': 'assets/mock/screen_home.json',
@@ -43,10 +34,12 @@ class MockApiClient implements ApiClient {
   }
 
   @override
-  Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
+  Future<Map<String, dynamic>> post(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
     await Future.delayed(latency);
 
-    // Simulate simple backend actions triggered from server-driven buttons.
     if (path.startsWith('/action/')) {
       return {'success': true, 'echo': body ?? {}};
     }

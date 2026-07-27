@@ -1,14 +1,4 @@
-/// Parses and validates timestamp strings coming from the backend (e.g. a
-/// screen config's `generatedAt` field). Backend data is never trusted
-/// blindly — an invalid or missing date must never crash parsing of the
-/// rest of the screen, so this always returns `null` on bad input instead
-/// of throwing.
-///
-/// Accepts strict ISO 8601 (e.g. `2026-07-27T10:15:00Z` or
-/// `2026-07-27T10:15:00+05:45`). Values that parse as a valid [DateTime]
-/// but don't round-trip through this format (e.g. "07/27/2026") are
-/// rejected, since silently accepting ambiguous formats is worse than
-/// treating the field as absent.
+
 class DateValidator {
   DateValidator._();
 

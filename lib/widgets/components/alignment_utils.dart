@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Parses the backend's alignment strings (e.g. "spaceBetween", "center")
-/// into Flutter's Main/CrossAxisAlignment enums, defaulting sensibly when
-/// the value is missing or unrecognized.
 class AlignmentUtils {
   AlignmentUtils._();
 

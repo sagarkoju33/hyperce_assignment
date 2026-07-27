@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A visible-but-contained error indicator used by the renderer whenever it
-/// encounters something it can't handle (unknown widget type, malformed
-/// node, etc). Deliberately renders inline rather than throwing, so one bad
-/// node from the backend never takes down the rest of the screen.
 class SduiErrorWidget extends StatelessWidget {
   final String message;
   const SduiErrorWidget({super.key, required this.message});
@@ -20,8 +16,11 @@ class SduiErrorWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.warning_amber_rounded,
-              size: 18, color: Theme.of(context).colorScheme.onErrorContainer),
+          Icon(
+            Icons.warning_amber_rounded,
+            size: 18,
+            color: Theme.of(context).colorScheme.onErrorContainer,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'color_utils.dart';
 
-/// Converts the small JSON style dictionary the backend can attach to a
-/// `text` widget (fontSize, fontWeight, color) into a [TextStyle].
-/// Unrecognized/missing keys simply fall back to the ambient theme style.
 class TextStyleUtils {
   TextStyleUtils._();
 
@@ -15,11 +12,7 @@ class TextStyleUtils {
     final color = ColorUtils.tryParse(json['color'] as String?);
     final weight = _parseWeight(json['fontWeight'] as String?);
 
-    return style.copyWith(
-      fontSize: fontSize,
-      color: color,
-      fontWeight: weight,
-    );
+    return style.copyWith(fontSize: fontSize, color: color, fontWeight: weight);
   }
 
   static FontWeight? _parseWeight(String? raw) {
