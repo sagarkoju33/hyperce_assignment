@@ -1,0 +1,53 @@
+{
+  "title": "Profile",
+  "backgroundColor": "#FFFFFF",
+  "generatedAt": "27/07/2026",
+  "widgets": [
+    {
+      "type": "text",
+      "text": "Edit Profile",
+      "style": { "fontSize": 22, "fontWeight": "bold", "color": "#212121" }
+    },
+    { "type": "spacer", "height": 20 },
+    {
+      "type": "textfield",
+      "id": "name",
+      "label": "Full Name",
+      "hint": "Enter your name",
+      "validator": "required"
+    },
+    { "type": "spacer", "height": 12 },
+    {
+      "type": "textfield",
+      "id": "email",
+      "label": "Email",
+      "hint": "you@example.com",
+      "validator": "email",
+      "required": true
+    },
+    { "type": "spacer", "height": 12 },
+    {
+      "type": "textfield",
+      "id": "age",
+      "label": "Age",
+      "hint": "Enter your age",
+      "validator": "number",
+      "required": true
+    },
+    { "type": "spacer", "height": 24 },
+    {
+      "type": "button",
+      "text": "Save Profile",
+      "style": "primary",
+      "action": {
+        "type": "api_call",
+        "endpoint": "/action/save_profile",
+        "method": "POST",
+        "onSuccessMessage": "Profile Updated",
+        "onErrorMessage": "Failed to update profile"
+      }
+    },
+    { "type": "spacer", "height": 8 }
+   
+  ]
+}

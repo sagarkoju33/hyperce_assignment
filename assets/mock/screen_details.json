@@ -1,0 +1,44 @@
+{
+  "title": "Details",
+  "backgroundColor": "#FFFFFF",
+  "generatedAt": "2026-07-27T09:05:30Z",
+  "widgets": [
+    {
+      "type": "text",
+      "text": "Details Screen",
+      "style": { "fontSize": 22, "fontWeight": "bold", "color": "#212121" }
+    },
+    { "type": "spacer", "height": 16 },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/400/220",
+      "borderRadius": 12
+    },
+    { "type": "spacer", "height": 16 },
+    {
+      "type": "text",
+      "text": "This entire route was pushed because the backend told the app to navigate to /details. No client-side screen code was hardcoded for this route.",
+      "style": { "fontSize": 14, "color": "#424242" }
+    },
+    { "type": "spacer", "height": 24 },
+    {
+      "type": "button",
+      "text": "Call Mock API Action",
+      "style": "primary",
+      "action": {
+        "type": "api_call",
+        "endpoint": "/action/like",
+        "method": "POST",
+        "onSuccessMessage": "Liked successfully!",
+        "onErrorMessage": "Something went wrong."
+      }
+    },
+    { "type": "spacer", "height": 12 },
+    {
+      "type": "button",
+      "text": "Back to Home",
+      "style": "secondary",
+      "action": { "type": "navigate", "route": "/home" }
+    }
+  ]
+}

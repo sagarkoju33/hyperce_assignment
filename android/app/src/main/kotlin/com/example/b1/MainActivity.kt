@@ -1,4 +1,4 @@
-package com.example.b1
+package hyperce.com.nu
 
 import io.flutter.embedding.android.FlutterActivity
 

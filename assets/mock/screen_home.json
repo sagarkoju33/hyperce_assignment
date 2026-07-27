@@ -1,0 +1,95 @@
+{
+  "title": "Home",
+  "backgroundColor": "#FFFFFF",
+  "generatedAt": "2026-07-27T09:00:00Z",
+  "widgets": [
+    {
+      "type": "text",
+      "text": "Welcome Rahul",
+      "style": { "fontSize": 24, "fontWeight": "bold", "color": "#212121" }
+    },
+    {
+      "type": "spacer",
+      "height": 12
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/400/200",
+      "borderRadius": 12
+    },
+    {
+      "type": "spacer",
+      "height": 16
+    },
+    {
+      "type": "card",
+      "backgroundColor": "#F5F5F5",
+      "padding": 16,
+      "child": {
+        "type": "column",
+        "children": [
+          {
+            "type": "text",
+            "text": "This screen is entirely rendered from a JSON config fetched from a mock API.",
+            "style": { "fontSize": 14, "color": "#424242" }
+          },
+          { "type": "spacer", "height": 8 },
+          {
+            "type": "row",
+            "mainAxisAlignment": "spaceBetween",
+            "children": [
+              {
+                "type": "text",
+                "text": "Powered by SDUI",
+                "style": { "fontSize": 12, "color": "#757575" }
+              },
+              {
+                "type": "text",
+                "text": "v1.0",
+                "style": { "fontSize": 12, "color": "#9E9E9E" }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    { "type": "spacer", "height": 16 },
+    { "type": "divider" },
+    { "type": "spacer", "height": 16 },
+    {
+      "type": "textfield",
+      "id": "search",
+      "label": "Search",
+      "hint": "Type something...",
+      "validator": "none"
+    },
+    { "type": "spacer", "height": 24 },
+    {
+      "type": "button",
+      "text": "Continue to Details",
+      "style": "primary",
+      "action": { "type": "navigate", "route": "/details" }
+    },
+    { "type": "spacer", "height": 12 },
+    {
+      "type": "button",
+      "text": "Go to Profile",
+      "style": "secondary",
+      "action": { "type": "navigate", "route": "/profile" }
+    },
+    { "type": "spacer", "height": 12 },
+    {
+      "type": "button",
+      "text": "Show Snackbar",
+      "style": "text",
+      "action": { "type": "snackbar", "message": "Hello from the backend!" }
+    },
+    { "type": "spacer", "height": 12 },
+    {
+      "type": "button",
+      "text": "Open Anthropic.com",
+      "style": "text",
+      "action": { "type": "open_url", "url": "https://www.anthropic.com" }
+    }
+  ]
+}
